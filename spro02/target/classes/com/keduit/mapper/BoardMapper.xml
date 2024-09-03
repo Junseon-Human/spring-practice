@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.keduit.mapper.BoardMapper">
+	<select id="getList" resultType="com.keduit.domain.BoardVO">
+		<!-- <![CDATA[ 구문 ]]> 은 bno > 0 에서 >가 태그를 닫는 표시가 아니라 기호자체 임을 지시함 -->
+		<![CDATA[
+		select * from t_board order by bno desc
+		]]>
+	</select>
+
+	<select id="getListWithPage"
+		resultType="com.keduit.domain.BoardVO">
+		<![CDATA[
+		select rn, bno, title, content, writer, regdate, updatedate
+		from
+		(select /*+ index_desc(t_board pk_board) */
+		rownum rn, bno, title, content, writer, regdate, updatedate
+		from t_board
+		where rownum <= #{pageNum} * #{amount})
+		where rn > (#{pageNum} -1) * #{amount}
+		]]>
+	</select>
+
+	<insert id="insert">
+		insert into t_board (bno, title, content, writer)
+		values (seq_board.nextval, #{title}, #{content}, #{writer})
+	</insert>
+
+	<!-- insert 후 PK를 알아야 하는 경우 -->
+	<insert id="insertSelectKey">
+		<selectKey keyProperty="bno" order="BEFORE"
+			resultType="long">
+			select seq_board.nextval from dual
+		</selectKey>
+
+		insert into t_board (bno, title, content, writer)
+		values (#{bno},
+		#{title},#{content},#{writer})
+	</insert>
+
+	<select id="read" resultType="com.keduit.domain.BoardVO">
+		select * from t_board where bno =
+		#{bno}
+	</select>
+
+	<delete id="delete">
+		delete from t_board where bno = #{bno}
+	</delete>
+
+	<update id="update">
+		update t_board set title=#{title},
+		content=#{content}, writer=#{writer},
+		updatedate=sysdate where bno =
+		#{bno}
+	</update>
+
+</mapper>

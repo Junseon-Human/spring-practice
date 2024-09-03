@@ -1,16 +1,31 @@
 package com.keduit.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.keduit.domain.SampleDTO;
 import com.keduit.domain.SampleDTOList;
+import com.keduit.domain.TodoDTO;
 
 import lombok.extern.log4j.Log4j;
 
@@ -18,6 +33,12 @@ import lombok.extern.log4j.Log4j;
 @RequestMapping("/sample/*")
 @Log4j
 public class SampleController {
+	
+	@GetMapping("/{statusCode}")
+	public String getErrorPage(@PathVariable String statusCode) {
+		log.info("-----------statusCode : " + statusCode);
+		return "custom404";
+	}
 	
 	@RequestMapping("")
 	public void basic() {
@@ -74,6 +95,73 @@ public class SampleController {
 	// http://localhost:9090/sample/ex02Bean?list%5B0%5D.name=hong&list%5B1%5D.name=moon
 	// &list%5B0%5D.age=25&list%5B1%5D.age=300
 	// 결과 : list dtos : SampleDTOList(list=[SampleDTO(name=hong, age=25),
-	//                  SampleDTO(name=moon, age=300)]
+	// SampleDTO(name=moon, age=300)]
+	
+	// http://localhost:9090/sample/ex03?title=lalabla&dueDate=2024-08-29
+	// 위 주소의 경우 dueDate=값이 날짜인지 알수 없으므로 변환이 필요함
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		binder.registerCustomEditor(java.util.Date.class, new CustomDateEditor(dateFormat, false));
+	}
+	// @InitBinder 로 처리 이후에는 /ex03 의 값을 변환하여 잘 받아옴
+	// TodoDTO의 필드 확인 @DateTimeFormat이 더 간편하고 많이쓰인다고함
+	
+	// 날짜 처리 : 자동 바인딩이 되지 않는 파라미터의 변환 예
+	@GetMapping("/ex03")
+	public void ex03 (TodoDTO dto) {
+		log.info("todo : " + dto);
+	}
+	
+	// 파라미터로 전달 되지않은 데이터를 화면으로 보내는 @ModelAttribute
+	@GetMapping("/ex04")
+	public String ex04(SampleDTO dto, @ModelAttribute("page") int page) {
+		log.info("dto : " + dto);
+		log.info("page : " + page);
+		return "/sample/ex04";
+	}
+	
+	// RedirectAttribute : Model 과 더불어 MVC가 자동으로 전달하는 타입
+	// addFlashAttribute(이름, 값) : 화면에서 한번 뿌려주고 소실
+	@GetMapping("/ex05")
+	public String ex05(RedirectAttributes rttr) {
+		rttr.addAttribute("name","java");
+		rttr.addFlashAttribute("result", "success");
+		return "redirect:/sample/ex10";
+	}
+	
+	@GetMapping("/ex06")
+	public @ResponseBody SampleDTO ex06() {
+		log.info("/ex06............");
+		SampleDTO dto = new SampleDTO();
+		dto.setAge(26);
+		dto.setName("문성현");
+		return dto;
+		
+	}
+	
+	@GetMapping("/ex07")
+	public ResponseEntity<String> ex07() {
+		log.info("ex07..........");
+		String msg = "{\"name\" : \"홍길동\"}";
+		HttpHeaders header = new HttpHeaders();
+		header.add("Content-type", "application/json;charset=UTF-8");
+		return new ResponseEntity<String>(msg, header, HttpStatus.OK);
+	}
+	
+	@GetMapping("/exUpload")
+	public void exUpload() {
+		log.info("---------- / exUpload------");
+	}
+	
+	@PostMapping("/exUploadPost")
+	public void exUploadPost(ArrayList<MultipartFile> files) {
+		files.forEach(file -> {
+			log.info("--------------------------------");
+			log.info("name : " + file.getOriginalFilename());
+			log.info("size : " + file.getSize());
+			log.info("contentType : " + file.getContentType());
+		});
+	}
 	
 }
