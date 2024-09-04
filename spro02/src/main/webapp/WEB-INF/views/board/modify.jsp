@@ -20,6 +20,10 @@
 				<div class="row">
 					<div class="col-lg-12">
 						<form role="form" action="/board/modify" method="post">
+							<input type="hidden" name="pageNum" value="${cri.pageNum }" />
+							<input type="hidden" name="amount" value="${cri.amount }" />
+							<input type="hidden" name="type" value="${cri.type }" />
+							<input type="hidden" name="keyword" value="${cri.keyword }" />
 							<div class="form-group">
 								<label>번호</label> <input class="form-control" name="bno"
 									value="${board.bno }" readonly>
@@ -79,16 +83,25 @@ $(()=> {
 		const operation = $(this).data("oper"); // data-oper의 값을 가져옴.
 		console.log("operation======>", operation);
 	
-	
 	if(operation === 'remove') {
 		formObj.attr("action","/board/remove")
-			   .attr("method", "post")
+			   .attr("method", "post");
 	} else if (operation === 'modify') {
 		formObj.attr("action", "/board/modify")
-		       .attr("method", "post")
+		       .attr("method", "post");
 	} else if (operation === 'list') {
+		const pageNumTag = $("input[name='pageNum']").clone();
+		const amountTag = $("input[name='amount']").clone();
+		const typeTag = $("input[name='type']").clone();
+		const keywordTag = $("input[name='keyword']").clone();
+		
 		formObj.attr("action","/board/list")
-		       .attr("method", "get")
+		       .attr("method", "get");
+		formObj.empty();
+		formObj.append(pageNumTag);
+		formObj.append(amountTag);
+		formObj.append(typeTag);
+		formObj.append(keywordTag);
 	}
 	
 	formObj.submit();

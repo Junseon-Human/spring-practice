@@ -59,4 +59,10 @@ public class BoardServieImpl implements BoardService {
 		return mapper.getListWithPage(cri);
 	}
 
+	@Override
+	public int getTotal(Criteria cri) {
+		log.info("--------------- get Total count : " + cri);
+		return mapper.getTotal(cri);
+	}
+
 }

@@ -87,4 +87,21 @@ public class BoardMapperTest {
 		List<BoardVO> list = mapper.getListWithPage(cri); 	
 		list.forEach(board -> log.info(board));
 	}
+	
+	@Test
+	public void testTotalCount() {
+		int count = mapper.getTotal(new Criteria());
+		log.info("게시글 전체 갯수 : " + count);
+	}
+	
+	@Test
+	public void testSearch() {
+		Criteria cri = new Criteria();
+		cri.setType("TC");
+		cri.setKeyword("한글");
+		List<BoardVO> list = mapper.getListWithPage(cri);
+		list.forEach(board -> log.info(board));
+	}
+	
+	
 }

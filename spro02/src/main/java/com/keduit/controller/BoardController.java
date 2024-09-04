@@ -4,6 +4,7 @@ package com.keduit.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,7 +37,9 @@ public class BoardController {
 	public void list(Model model, Criteria cri) {
 		log.info("--------- list --------- : ");
 		model.addAttribute("list", service.getList(cri));
-		model.addAttribute("pageMaker", new PageDTO(cri, 155));
+		int total = service.getTotal(cri);
+		log.info("-------------- total : " + total);
+		model.addAttribute("pageMaker", new PageDTO(cri, total));
 	}
 	
 	
@@ -60,30 +63,40 @@ public class BoardController {
 	
 	// 두개 이상의 매핑을 할떄는 () 안에 {}를 사용하여 다중 처리
 	@GetMapping({"/get", "/modify"})
-	public void get(@RequestParam("bno") Long bno, Model model) {
+	public void get(@RequestParam("bno") Long bno,@ModelAttribute("cri") Criteria cri, Model model) {
 		log.info("------------ /get or /modify --------------");
 		model.addAttribute("board", service.get(bno));
 	}
 	
 	
 	@PostMapping("/modify")
-	public String modify(BoardVO board, RedirectAttributes rttr) {
+	public String modify(BoardVO board, Criteria cri, RedirectAttributes rttr) {
 		log.info("----------- modify ---------" + board);
 		
 		if (service.modify(board)) {
 			rttr.addFlashAttribute("result", "success");
 		}
-		
+		rttr.addAttribute("pageNum", cri.getPageNum());
+		rttr.addAttribute("amount", cri.getAmount());
+		rttr.addAttribute("type", cri.getType());
+		rttr.addAttribute("keyword", cri.getKeyword());
 		return "redirect:/board/list";
 	}
 	
 	@PostMapping("/remove")
-	public String remove(@RequestParam("bno") Long bno, RedirectAttributes rttr) {
+	public String remove(@RequestParam("bno") Long bno, RedirectAttributes rttr, Criteria cri) {
 		log.info("------------- remove -----------");
 		if (service.remove(bno)) {
 			rttr.addFlashAttribute("result", "success");
 		}
-		return "redirect:/board/list";
+//		rttr.addAttribute("pageNum", cri.getPageNum());
+//		rttr.addAttribute("amount", cri.getAmount());
+//		rttr.addAttribute("type", cri.getType());
+//		rttr.addAttribute("keyword", cri.getKeyword());
+//		return "redirect:/board/list";
+		
+//		UriComponentsBuilder 를 이용해 위의 코드한줄로 줄인다
+		return "redirect:/board/list" + cri.getListLink();
 	}
 	
 }

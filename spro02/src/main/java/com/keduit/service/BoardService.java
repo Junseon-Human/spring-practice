@@ -25,4 +25,7 @@ public interface BoardService {
 	// 목록보기(페이지네이션)
 	public List<BoardVO> getList(Criteria cri);
 	
+	// 데이터베이스의 총 갯수 파악하기
+	public int getTotal(Criteria cri);
+	
 }

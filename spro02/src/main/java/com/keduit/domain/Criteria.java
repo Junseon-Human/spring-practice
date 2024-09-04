@@ -1,5 +1,7 @@
 package com.keduit.domain;
 
+import org.springframework.web.util.UriComponentsBuilder;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,6 +13,10 @@ public class Criteria {
 	private int pageNum;
 	private int amount; 
 	
+//	검색을 위한 필드 : T(제목), C(내용), W(작성자)
+	private String type;
+	private String keyword;
+	
 	public Criteria() {
 		this(1, 10);
 	}
@@ -20,5 +26,17 @@ public class Criteria {
 		this.amount = amount;
 	}
 	
+	public String[] getTypeArr() {
+		return type == null ? new String[] {} : type.split("");
+	}
+	
+	public String getListLink() {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromPath("")
+				.queryParam("pageNum", this.pageNum)
+				.queryParam("amount", this.amount)
+				.queryParam("type", this.type)
+				.queryParam("keyword", this.keyword);
+		return builder.toUriString();
+	}
 	
 }
