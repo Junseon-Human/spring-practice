@@ -181,13 +181,10 @@
 								});
 
 						/* 게시글 상세 조회에 페이지 정보 넘기기 */
-						$(".move")
-								.on(
-										"click",
-										function(e) {
+						$(".move").on("click",function(e) {
 											e.preventDefault();
-											actionForm
-													.append("<input type='hidden' name='bno' value='"
+											$("input[name='bno']").remove();
+											actionForm.append("<input type='hidden' name='bno' value='"
 															+ $(this).attr(
 																	"href")
 															+ "'>");
