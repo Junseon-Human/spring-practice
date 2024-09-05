@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.keduit.mapper.ReplyMapper">
+	<insert id="insert">
+		insert into t_reply (rno, bno, reply, replyer) values (seq_reply.nextval, #{bno}, #{reply}, #{replyer})
+	</insert>
+	
+	<select id="selectOne" resultType="com.keduit.domain.ReplyVO">
+		select * from t_reply where rno = #{rno}
+	</select>
+	
+	<delete id="delete">
+		delete from t_reply where rno = #{rno}
+	</delete>
+	
+	<update id="update">
+		update t_reply set reply = #{reply}, updatedate = sysdate where rno = #{rno}
+	</update>
+	
+	<select id="selectAll" resultType="com.keduit.domain.ReplyVO">
+		select * from t_reply where bno = #{bno} order by rno desc
+	</select>
+</mapper>

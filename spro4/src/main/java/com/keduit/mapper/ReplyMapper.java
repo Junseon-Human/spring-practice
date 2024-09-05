@@ -1,0 +1,22 @@
+package com.keduit.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import com.keduit.domain.Criteria;
+import com.keduit.domain.ReplyVO;
+
+public interface ReplyMapper {
+	
+	public int insert(ReplyVO vo);
+	
+	public ReplyVO selectOne(Long rno);
+	
+	public int delete(Long rno);
+	
+	public int update(ReplyVO vo);
+	
+	public List<ReplyVO> selectAll(@Param("cri") Criteria cri, @Param("bno") Long bno);
+	
+}
