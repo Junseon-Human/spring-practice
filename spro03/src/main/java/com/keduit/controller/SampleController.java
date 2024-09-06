@@ -75,7 +75,7 @@ public class SampleController {
 	
 	// 파라미터 사용하기
 	// @PathVariable : URL정보를 파라미터로 사용
-	// @PathVariable의 데이터 자료형은 기본 자료형은 넣을 수 없다.
+	// @PathVariable의 데이터 자료형은 기본 자료형도 넣을 수 있다.
 	@GetMapping("/product/{cat}/{pid}")
 	public String[] getPath(
 		@PathVariable("cat") String cat,
