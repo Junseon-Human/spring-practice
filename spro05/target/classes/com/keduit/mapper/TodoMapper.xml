@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.keduit.mapper.TodoMapper">
+
+	<sql id="criteria">
+		<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+
+			<foreach item="type" collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'T'.toString()">
+							title like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'W'.toString()">
+							writer like '%'||#{keyword}||'%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+
+	<select id="getListWithPage"
+		resultType="com.keduit.domain.TodoVO">
+		select * from (select /*+ index_asc(t_todo pk_todo) */
+		rownum rn, tno,
+		title, writer, dueDate, finished from t_todo
+		where
+		
+		<include refid="criteria"/>
+		
+		<![CDATA[
+			rownum <= #{pageNum} * #{amount})
+		where rn > (#{pageNum} -1) * #{amount}
+		]]>
+
+	</select>
+
+	<insert id="insert">
+		insert into t_todo (tno,title ,dueDate, writer)
+		values (seq_todo.nextval, #{title}, #{dueDate}, #{writer})
+	</insert>
+
+	<select id="read" resultType="com.keduit.domain.TodoVO">
+		select * from t_todo where tno =
+		#{tno}
+	</select>
+
+	<delete id="delete">
+		delete from t_todo where tno = #{tno}
+	</delete>
+
+	<update id="update">
+		update t_todo set title=#{title},
+		dueDate=#{dueDate},
+		writer=#{writer},
+		finished=#{finished} where tno = #{tno}
+	</update>
+
+	<select id="getTotal" resultType="int">
+
+		select count(*) from t_todo where 
+		
+		<include refid="criteria"/>
+		
+		<![CDATA[
+		tno > 0
+		]]>
+	</select>
+
+</mapper>
