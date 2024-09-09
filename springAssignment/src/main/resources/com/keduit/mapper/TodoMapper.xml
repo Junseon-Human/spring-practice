@@ -25,7 +25,7 @@
 
 	<select id="getListWithPage"
 		resultType="com.keduit.domain.TodoVO">
-		select * from (select /*+ index_desc(t_todo pk_tno) */
+		select rn, tno, title, duedate, writer, finished from (select /*+ index_asc(t_todo pk_tno) */
 		rownum rn, tno,
 		title, writer, dueDate, finished from t_todo
 		where
