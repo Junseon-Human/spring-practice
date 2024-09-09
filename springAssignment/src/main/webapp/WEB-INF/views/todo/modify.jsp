@@ -20,10 +20,10 @@
 				<div class="row">
 					<div class="col-lg-12">
 						<form role="form" action="/todo/modify" method="post">
-							<input type="hidden" name="pageNum" value="${cri.pageNum }" />
-							<input type="hidden" name="amount" value="${cri.amount }" />
-							<input type="hidden" name="type" value="${cri.type }" />
-							<input type="hidden" name="keyword" value="${cri.keyword }" />
+							<input type="hidden" name="pageNum" value="${cri.pageNum }" /> <input
+								type="hidden" name="amount" value="${cri.amount }" /> <input
+								type="hidden" name="type" value="${cri.type }" /> <input
+								type="hidden" name="keyword" value="${cri.keyword }" />
 							<div class="form-group">
 								<label>번호</label> <input class="form-control" name="tno"
 									value="${todo.tno }" readonly>
@@ -37,18 +37,20 @@
 									value="${todo.writer }" readonly>
 							</div>
 							<div class="form-group">
-								<label>일정</label> <input type="date" class="form-control" name="dueDate"
-									value='<fmt:formatDate pattern="yyyy/MM/dd" value="${todo.dueDate }"/>'
-									>
+								<label>일정</label> <input type="date" class="form-control"
+									name="dueDate" value="${todo.dueDate }" />
 							</div>
 							<div class="form-group">
-							<input type="checkbox" for="finished" name="finished" value="1" />
-							<label for="finished">Finished</label>
+								<input type="checkbox" id="finished" name="finished" value="1"
+									<c:choose>
+       									 <c:when test="${todo.finished == '1'}">checked</c:when>
+   								    </c:choose> />
+								<label for="finished">Finished</label>
 							</div>
 							<button type="submit" data-oper="modify" class="btn btn-default">수정</button>
 							<button type="submit" data-oper="remove" class="btn btn-danger">삭제</button>
 							<button type="submit" data-oper="list" class="btn btn-info">목록보기</button>
-							
+
 						</form>
 					</div>
 					<!-- end col-lg-6 -->

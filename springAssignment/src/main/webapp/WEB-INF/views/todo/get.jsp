@@ -32,7 +32,7 @@
 								value="${todo.writer }" readonly>
 						</div>
 						<div class="form-group">
-							<label>작성자</label> <input type="date" class="form-control" name="writer"
+							<label>일정</label> <input type="date" class="form-control" name="deuDate"
 								value="${todo.dueDate }" readonly>
 						</div>
 						<button data-oper="modify" class="btn btn-default">수정</button>

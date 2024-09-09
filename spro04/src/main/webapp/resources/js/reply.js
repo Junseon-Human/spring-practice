@@ -29,7 +29,8 @@ const replyService = (function () {
     // || : param.page 가 없으면 1 넣어
     $.getJSON("/replies/pages/" + bno + "/" + page + ".json", function (data) {
       if (callback) {
-        callback(data);
+        // callback(data); // 댓글 목록만 가져오는경우
+        callback(data.replyCnt, data.list); // 페이징 처리 된 댓글 목록 가져오기
       }
     }).fail(function (xhr, status, err) {
       if (error) {

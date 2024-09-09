@@ -78,6 +78,8 @@
 					</li>
 				</ul>
 			</div>
+			<!-- .panel-body end  -->
+			<div class="panel-footer"></div>
 		</div>
 	</div>
 </div>
@@ -136,7 +138,16 @@
 		showList(1);
 		
 		function showList(page) {
-			replyService.getList({bno:bnoValue, page:page || 1}, function(list){
+			replyService.getList({bno:bnoValue, page:page || 1}, function(replyCnt, list){
+				console.log("replyCnt : " + replyCnt);
+				console.log("list : " + list);
+				
+				if (page == -1) {
+					pageNum = Math.ceil(replyCnt / 5.0 );
+					showList(pageNum);
+					return;
+				}
+				
 				let str = "";
 				if (list == null || list.length == 0) {
 					replyUL.html("");
@@ -151,9 +162,66 @@
 				}
 				
 				replyUL.html(str);
+				showReplyPage(replyCnt);
 			});
 		}
 		
+		// 댓글목록 페이징 처리
+		let pageNum = 1;
+		const replyPageFooter = $(".panel-footer");
+		
+		function showReplyPage(replyCnt) {
+			let endPage = Math.ceil(pageNum / 5.0) * 5;
+			let startPage = endPage - 4;
+			
+			let prev = startPage != 1;
+			let next = false;
+			
+			if(endPage * 5 >= replyCnt) {
+				endPage = Math.ceil(replyCnt / 5.0);
+				console.log("endPage = " + endPage);
+			}
+			
+			
+			if (endPage * 5 < replyCnt) {
+				next = true;
+			}
+			
+			let str = "<ul class='pagination pull-right'>";
+			
+			if (prev) {
+				str += "<li class='page-item'><a class='page-link' href='"
+					+ (startPage -1) + "'>Previous</a></li>";
+			}
+			
+			for (let i = startPage; i <= endPage; i++) {
+				const active = pageNum == i ? "active" : "";
+				str += "<li class = 'page-item " + active
+					+ "'><a class='page-link' href='" + i + "'>" + i + "</a></li>";
+			}
+			
+			if (next) {
+				str += "<li class='page-item'><a class='page-link' href='"
+					+ (endPage + 1) + "'>Next</a></li>";
+			}
+			str += "</ul>";
+			
+			replyPageFooter.html(str);
+		}
+		
+		// 댓글의 페이지 이벤트 처리
+		replyPageFooter.on("click", "li a", function(e){
+			e.preventDefault();
+			console.log("page click!!!");
+			
+			const targetPageNum = $(this).attr("href");
+			console.log("targetPageNum = " + targetPageNum);
+			pageNum = targetPageNum;
+			showList(pageNum);
+			
+		})
+		
+		// 댓글 등록 모달
 		const modal = $(".modal");
 		const modalInputReply = modal.find("input[name='reply']");
 		const modalInputReplyer = modal.find("input[name='replyer']");
@@ -170,49 +238,76 @@
 			modal.find("button[id != 'modalCloseBtn']").hide();
 			modalRegisterBtn.show();
 			$(".modal").modal("show");
-		})
+		});
 		
 		
-		
+		modalRegisterBtn.on("click", function(e){
+			const reply = {
+					reply:modalInputReply.val(),
+					replyer:modalInputReplyer.val(),
+					bno: bnoValue
+			};
 			replyService.add(
-        //reply
-        {reply: "JS TEST", replyer: "tester", bno : bnoValue},
-      //callback
-        function(result) {
-            alert("RESULT: " + result);
-        }
-    );
-		
-		replyService.getList({bno:bnoValue, page:1}, function(list){
-			for (let i = 0, len = list.length || 0; i < len; i++) {
-				console.log(list[i]);
-			}
-		});
-		
-		replyService.remove(14, function(count){
-			console.log(count);
-			
-			if (count == "success") {
-				alert("삭제 성공!");
-			}
-			
-		}, function(err) {
-			alert("삭제 실패" + err);
-		});
-		
-		replyService.update({
-			rno: 6,
-			bno: bnoValue,
-			reply: "Modified reply........."
-			}, function(result) {
-				alert("수정 완료");	
+			        //reply
+			       reply,
+			      //callback
+			        function(result) {
+			            alert("RESULT: " + result);
+			            modal.find("input").val("");
+			            modal.modal("hide");
+			         showList(-1); 	// 댓글 추가 후 목록 가져오기
+			        }
+			    );
 			});
 		
-		//댓글 번호로 조회
-		replyService.get(25, function(data) {
-			console.log(".........data : " + data);
-		});
+		// 댓글 상세 보기
+		$(".chat").on("click", "li", function(e){
+			const rno = $(this).data("rno");
+			
+			replyService.get(rno, function(data) {
+	 			console.log(".........data : " + data);
+	 			modalInputReply.val(data.reply);
+	 			modalInputReplyer.val(data.replyer);
+	 			modalInputeplydate.val(replyService.displayTime(data.replydate)).attr("readonly", "readonly");
+	 			modal.data("rno", data.rno);
+	 			
+	 			modal.find("button[id != 'modalCloseBtn']").hide();
+	 			modalModBtn.show();
+	 			modalRemoveBtn.show();
+	 			
+	 			$(".modal").modal("show");
+ 			});
+		})
 		
+		// 댓글 수정하기
+		modalModBtn.on("click", function(e) {
+			const reply = {
+				rno: modal.data("rno"),
+				bno: bnoValue,
+				reply: modalInputReply.val()
+			};
+			replyService.update(reply, function(result) {
+	 				alert("수정 완료" + result);	
+	 				modal.modal("hide");
+	 				showList(pageNum);
+	 			});
+		})
+		
+		// 댓글 삭제하기
+		modalRemoveBtn.on("click", function(e) {
+			const rno = modal.data("rno");
+			
+			replyService.remove(rno, function(count){
+	 			console.log(count);
+				
+	 			if (count == "success") {
+	 				alert("삭제 성공!");
+	 			};
+	 			modal.modal("hide");
+	 			
+	 			showList(pageNum);
+			});
+		});
 		
 		const operForm = $("#operForm");
 		$("button[data-oper='modify']").on("click", function(){
@@ -223,6 +318,51 @@
 		});
 		
 		});
+	
+		
+		
+		
+		
+// 			replyService.add(
+//         //reply
+//         {reply: "JS TEST", replyer: "tester", bno : bnoValue},
+//       //callback
+//         function(result) {
+//             alert("RESULT: " + result);
+//         }
+//     );
+		
+// 		replyService.getList({bno:bnoValue, page:1}, function(list){
+// 			for (let i = 0, len = list.length || 0; i < len; i++) {
+// 				console.log(list[i]);
+// 			}
+// 		});
+		
+// 		replyService.remove(14, function(count){
+// 			console.log(count);
+			
+// 			if (count == "success") {
+// 				alert("삭제 성공!");
+// 			}
+			
+// 		}, function(err) {
+// 			alert("삭제 실패" + err);
+// 		});
+		
+// 		replyService.update({
+// 			rno: 6,
+// 			bno: bnoValue,
+// 			reply: "Modified reply........."
+// 			}, function(result) {
+// 				alert("수정 완료");	
+// 			});
+		
+		//댓글 번호로 조회
+// 		replyService.get(25, function(data) {
+// 			console.log(".........data : " + data);
+// 		});
+		
+		
 </script>
 
 <%@ include file="../includes/footer.jsp"%>

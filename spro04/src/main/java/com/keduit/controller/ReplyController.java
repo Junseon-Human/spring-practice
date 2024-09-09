@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.keduit.domain.Criteria;
+import com.keduit.domain.ReplyPageDTO;
 import com.keduit.domain.ReplyVO;
 import com.keduit.service.ReplyService;
 
@@ -43,16 +44,16 @@ public class ReplyController {
 	}
 	
 	// 특정 게시물의 댓글 목록 가져오기
-	@GetMapping(value="/pages/{bno}/{page}",
-			produces= {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-	public ResponseEntity<List<ReplyVO>> getList(
-			@PathVariable("bno") Long bno, @PathVariable("page") int page) {
-		log.info("............ getList ..............");
-		Criteria cri = new Criteria(page, 10);
-		log.info("................. cri : " + cri);
-		
-		return new ResponseEntity<List<ReplyVO>>(service.getList(cri, bno), HttpStatus.OK);
-	}
+//	@GetMapping(value="/pages/{bno}/{page}",
+//			produces= {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+//	public ResponseEntity<List<ReplyVO>> getList(
+//			@PathVariable("bno") Long bno, @PathVariable("page") int page) {
+//		log.info("............ getList ..............");
+//		Criteria cri = new Criteria(page, 10);
+//		log.info("................. cri : " + cri);
+//		
+//		return new ResponseEntity<List<ReplyVO>>(service.getList(cri, bno), HttpStatus.OK);
+//	}
 	
 	// 댓글 번호로 읽기
 	@GetMapping(value="/{rno}", 
@@ -87,6 +88,18 @@ public class ReplyController {
 		return service.modify(vo) == 1 ? new ResponseEntity<String>("success", HttpStatus.OK)
 				: new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	// 게시물 댓글 목록의 페이징 처리하기
+	@GetMapping(value="/pages/{bno}/{page}",
+			produces = {MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+	public ResponseEntity<ReplyPageDTO> getListWithPaging(
+			@PathVariable("bno") Long bno, @PathVariable("page") int page) {
+		Criteria cri = new Criteria(page, 5);
+		log.info("get reply : " + bno + " & cri : " + cri);
+		
+		return new ResponseEntity<>(service.getListPage(cri, bno), HttpStatus.OK);
+	}
+	
 	
 	
 	

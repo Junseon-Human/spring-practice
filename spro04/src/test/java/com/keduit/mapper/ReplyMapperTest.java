@@ -75,4 +75,19 @@ public class ReplyMapperTest {
 		List<ReplyVO> replies = mapper.selectAll(cri, bnoArr[1]);
 		replies.forEach(reply -> log.info(reply));
 	}
+	
+	@Test
+	public void testReplyList() {
+		Criteria cri = new Criteria(2, 5);
+		
+		// 읽을 Bno 지정하기
+		List<ReplyVO> replies = mapper.selectAll(cri, 589865L);
+		replies.forEach(reply -> log.info(reply));
+		}
+	
+	@Test
+	public void testReplyCount() {
+		log.info(mapper.getCountByBno(589865L));
+	}
+	
 }

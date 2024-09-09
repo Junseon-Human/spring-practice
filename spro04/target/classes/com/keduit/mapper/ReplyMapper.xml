@@ -5,22 +5,43 @@
 
 <mapper namespace="com.keduit.mapper.ReplyMapper">
 	<insert id="insert">
-		insert into t_reply (rno, bno, reply, replyer) values (seq_reply.nextval, #{bno}, #{reply}, #{replyer})
+		insert into t_reply (rno, bno, reply, replyer) values
+		(seq_reply.nextval, #{bno}, #{reply}, #{replyer})
 	</insert>
-	
+
 	<select id="selectOne" resultType="com.keduit.domain.ReplyVO">
-		select * from t_reply where rno = #{rno}
+		select * from t_reply where
+		rno = #{rno}
 	</select>
-	
+
 	<delete id="delete">
 		delete from t_reply where rno = #{rno}
 	</delete>
-	
+
 	<update id="update">
-		update t_reply set reply = #{reply}, updatedate = sysdate where rno = #{rno}
+		update t_reply set reply = #{reply}, updatedate =
+		sysdate where rno = #{rno}
 	</update>
-	
+
 	<select id="selectAll" resultType="com.keduit.domain.ReplyVO">
-		select * from t_reply where bno = #{bno} order by rno desc
+		<![CDATA[
+		select rno, bno, reply, replyer, replydate, updatedate
+		from (
+				select /*+ index(t_reply
+				idx_reply) */
+				rownum rn, bno, rno, reply, replyer, replydate, updatedate
+				from t_reply
+				where bno = #{bno}
+				and rno > 0
+				and rownum <= #{cri.pageNum} * #{cri.amount}
+			)
+			where rn > (#{cri.pageNum} - 1) * #{cri.amount}
+			
+		]]>
 	</select>
+	
+	<select id="getCountByBno" resultType="int">
+		select count(rno) from t_reply where bno = #{bno}
+	</select>
+	
 </mapper>
